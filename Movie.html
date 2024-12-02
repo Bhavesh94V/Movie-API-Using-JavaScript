@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./main.css">
+    <title>Movie Search API</title>
+    <style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: black;
+            color: #fff;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            color: #fff;
+        }
+
+        form {
+            display: flex;
+            justify-content: center;
+            margin: 20px;
+        }
+
+        .search-input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            width: 300px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+            outline: none;
+            background-color: #333;
+            color: #fff;
+        }
+
+        .search-input::placeholder {
+            color: #aaa;
+        }
+
+        .search-input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-left: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:focus {
+            outline: none;
+        }
+
+        .image-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px;
+        }
+
+        .image-container img {
+            margin: 10px;
+            max-width: 200px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+        }
+
+        .image-container img:hover {
+            transform: scale(1.05);
+        }
+
+        #errorMsg {
+            text-align: center;
+            color: #e74c3c;
+            font-weight: bold;
+            margin: 20px;
+        }
+
+        .Gallary {
+            display: grid;
+            grid-template-columns: repeat(4, 200px);
+            gap: 20px;
+            padding: 10px;
+            justify-content: center;
+        }
+
+        .Cards {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #333;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .Cards img {
+            width: 100%;
+            border-radius: 4px;
+        }
+
+        .Cards h3 {
+            margin-top: 10px;
+            color: white;
+        }
+
+        .viewButton {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .viewButton:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Movie Search API</h1>
+
+    <form id="searchForm">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search for a movie...">
+        <button type="button" id="searchBtn">Search</button>
+    </form>
+
+    <div id="imageContainer" class="image-container"></div>
+    <p id="errorMsg"></p>
+
+    <script>
+       document.getElementById('searchBtn').addEventListener('click', function () {
+            const query = document.getElementById('searchInput').value.trim();
+            const gallery = document.getElementById('imageContainer');
+            gallery.classList.add('Gallary');
+            const errorMsg = document.getElementById('errorMsg');
+
+            if (!query) {
+                errorMsg.textContent = 'Please enter a search term.';
+                gallery.innerHTML = '';
+                return;
+            }
+
+            const apiUrl = `http://www.omdbapi.com/?i=tt3896198&apikey=be154bf3&s=${query}&type=movie`;
+
+            const xhr = new XMLHttpRequest();
+
+            xhr.open('GET', apiUrl, true);
+
+            xhr.onload = function () {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    const data = JSON.parse(xhr.responseText);
+                    gallery.innerHTML = '';
+                    errorMsg.textContent = '';
+
+                    if (data.Response === 'True') {
+                        data.Search.forEach(movie => {
+                            const poster = movie.Poster !== 'N/A' ? movie.Poster : 'https://via.placeholder.com/200x300?text=No+Image';
+
+                            const card = document.createElement('div');
+                            card.classList.add('Cards');
+
+                            const img = document.createElement('img');
+                            img.src = poster;
+                            img.alt = movie.Title;
+
+                            const name = document.createElement('h3');
+                            name.textContent = movie.Title;
+
+                            const viewButton = document.createElement('a');
+                            viewButton.classList.add('viewButton');
+                            viewButton.textContent = 'View Details';
+
+                            // const params = {
+                            //     title: movie.Title,
+                            //     year: movie.Year,
+                            //     rated: movie.Rated,
+                            //     released: movie.Released,
+                            //     actors: movie.Actors,
+                            //     language: movie.Language,
+                            //     country: movie.Country,
+                            //     poster: movie.Poster,
+                            //     imdbID: movie.imdbID,
+                            //     production: movie.Production,
+                            //     website: movie.Website || ''
+                            // };
+                            
+
+                            // // Create query string
+                            // const queryString = new URLSearchParams(params).toString();
+                            // viewButton.href = `viewMovie.html?${queryString}`;
+
+                            card.appendChild(img);
+                            card.appendChild(name);
+                            card.appendChild(viewButton);
+
+                            gallery.appendChild(card);
+                        });
+                    } else {
+                        errorMsg.textContent = 'No results found.';
+                    }
+                } else {
+                    gallery.innerHTML = '';
+                    errorMsg.textContent = 'An error occurred while fetching the data.';
+                }
+            };
+
+            xhr.onerror = function () {
+                gallery.innerHTML = '';
+                errorMsg.textContent = 'An error occurred while fetching the data.';
+            };
+
+            xhr.send();
+        });
+
+    </script>
+</body>
+
+</html>
